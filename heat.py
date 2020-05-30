@@ -10,7 +10,7 @@ L = 1
 W = 1
 H = 1
 nd_density = 200
-duration = 10
+duration = 5
 stepsize = 0.0001
 steps = int(duration/stepsize)
 
@@ -53,14 +53,16 @@ ax.set_title("t = 0 sec")
 # reference temperatures
 roomtempline = ax.plot(np.arange(L+1), np.ones(L+1)*22, lw=2)
 hotrefline = ax.plot(np.arange(L+1), np.ones(L+1)*60, lw=2)
-line, = ax.plot([], [], lw=2)
-line2, = ax.plot([], [], lw=2)
+
+line, = ax.plot([], [], lw=2, label='Wood')
+line2, = ax.plot([], [], lw=2, label='Iron')
 
 def init():
     line.set_data([], [])
     line2.set_data([], [])
     return line, line2,
 
+# only displays every tenth frame since animation is too slow otherwise
 def animate(i):
     x = np.linspace(0,L,L*nd_density)
     y1 = mesh1.history[i*10]
@@ -70,7 +72,8 @@ def animate(i):
     ax.set_title("t = {} sec".format(str(round(10 * i * stepsize, 2)).ljust(6)))
     return line, line2,
 
-anim = animation.FuncAnimation(fig, animate, init_func=init, frames=int(len(mesh1.history)/10), interval=1)
+anim = animation.FuncAnimation(fig, animate, init_func=init, frames=int(len(mesh1.history)/10), interval=20)
+plt.legend(loc='upper left')
 plt.show()
     
 
