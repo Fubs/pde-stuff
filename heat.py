@@ -51,8 +51,8 @@ ax.set_ylabel('Temperature (C)')
 ax.set_title("t = 0 sec")
 
 # reference temperatures
-roomtemp = ax.plot(np.arange(L+1), np.ones(L+1)*22, lw=2)
-roomtemp = ax.plot(np.arange(L+1), np.ones(L+1)*60, lw=2)
+roomtempline = ax.plot(np.arange(L+1), np.ones(L+1)*22, lw=2)
+hotrefline = ax.plot(np.arange(L+1), np.ones(L+1)*60, lw=2)
 line, = ax.plot([], [], lw=2)
 line2, = ax.plot([], [], lw=2)
 
