@@ -44,7 +44,6 @@ def update(frame):
     return grid,
 
 anim = animation.FuncAnimation(fig, update, frames=range(int(len(mesh.history)/20)), init_func=init, interval=10)
-plt.legend()
 
 plt.show()
 
