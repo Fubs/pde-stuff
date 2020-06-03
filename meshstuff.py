@@ -68,11 +68,11 @@ class Mesh:
             nextstate = np.zeros(np.shape(self.state))
             with np.nditer(self.state, flags=['multi_index']) as it:
                 for x in it:
+                    # these if/elses make the mesh not leak heat out of boundary nodes
                     if it.multi_index == (0,):
                         nextstate[it.multi_index] = self.state[it.multi_index[0] + 1]
                     elif it.multi_index == (len(self.state)-1,):
-                        #nextstate[it.multi_index] = self.state[it.multi_index[0] - 1]
-                        nextstate[it.multi_index] = 100
+                        nextstate[it.multi_index] = self.state[it.multi_index[0] - 1]
                     else:
                         nextstate[it.multi_index] = update_fn(self, it.multi_index, stepsize)
             self.state = np.copy(nextstate)

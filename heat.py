@@ -6,30 +6,26 @@ from algos import *
 
 # L, W, H are in physical length units
 # nd_density is nodes per unit length
-L = 1
-W = 1
-H = 1
-nd_density = 200
+L = 5
+W = 5
+nd_density = 100
 duration = 5
-stepsize = 0.0001
+stepsize = 0.001
 steps = int(duration/stepsize)
 
 
 # each item in stencil is an offset, and will 
 # be added to target index to find neighbors
 
-# for 1d
 three_pt_stencil = [[-1],[0],[1]]
 
-# for 2d
-#five_pt_stencil = [[0,0],[1,0],[0,1],[-1,0],[0,-1]]
-
-# for 3d
-# seven_pt_stencil = [[0,0,0],[1,0,0],[0,1,0],[0,0,1],[-1,0,0],[0,-1,0],[0,0,-1]]
 
 # make initial state
 #init_state = np.linspace(0, 100, L*nd_density)
 init_state = np.zeros(L*nd_density)
+mid = int(L*nd_density)/2
+# set a section in the middle to 100 C
+init_state[240:260] = 100
 
 mesh1 = Mesh(init_state, three_pt_stencil)
 mesh1.nd_spacing = 1/nd_density
@@ -49,10 +45,6 @@ ax = plt.axes(xlim=(0,L), ylim=(0, 100))
 ax.set_xlabel('Position along object (m)')
 ax.set_ylabel('Temperature (C)')
 ax.set_title("t = 0 sec")
-
-# reference temperatures
-roomtempline = ax.plot(np.arange(L+1), np.ones(L+1)*22, lw=2)
-hotrefline = ax.plot(np.arange(L+1), np.ones(L+1)*60, lw=2)
 
 line, = ax.plot([], [], lw=2, label='Wood')
 line2, = ax.plot([], [], lw=2, label='Iron')
