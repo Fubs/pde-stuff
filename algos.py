@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.linalg
 from meshstuff import *
 
 # finite difference coeffs from wikipedia
@@ -36,6 +37,35 @@ def ftcs3d(mesh, it, stepsize):
     next_val = (mesh.diffusivity * stepsize * laplacian) + vals[0]
     return next_val
     
+def btcs1d(mesh, stepsize):
+    xstep = mesh.nd_spacing
+    tstep = stepsize
+    # tridiagonal coeff matrix
+    # i've read that there's a faster way to solve
+    # the linear system since its tridiagonal
+    # TODO: figure that out
+    r = (mesh.diffusivity * tstep)/(xstep**2)
+    A = 1 + 2*r
+    B = -r
+    boundaryCoeff = A
+    emptyrow = np.zeros(np.size(mesh.state))
+    coeffMatrix = np.copy(emptyrow)
+    coeffMatrix[0] = boundaryCoeff
+    coeffMatrix[1] = B
+    lastrow = np.copy(emptyrow)
+    lastrow[-1] = boundaryCoeff
+    lastrow[-2] = B
+    for n in range(np.size(mesh.state)-2):
+        newrow = np.copy(emptyrow)
+        newrow[n] = B
+        newrow[n+1] = A
+        newrow[n+2] = B
+        coeffMatrix = np.vstack([coeffMatrix, newrow])
+    coeffMatrix = np.vstack([coeffMatrix, lastrow])
+    currentState = np.copy(mesh.state)
+    return numpy.linalg.solve(coeffMatrix, currentState)
+
+
     
 
     

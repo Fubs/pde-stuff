@@ -6,11 +6,11 @@ from algos import *
 
 # L, W, H are in physical length units
 # nd_density is nodes per unit length
-L = 5
-W = 5
+L = 3
+W = 3
 nd_density = 100
-duration = 5
-stepsize = 0.001
+duration = 3
+stepsize = 0.0001
 steps = int(duration/stepsize)
 
 
@@ -29,13 +29,13 @@ init_state[240:260] = 100
 
 mesh1 = Mesh(init_state, three_pt_stencil)
 mesh1.nd_spacing = 1/nd_density
-mesh1.diffusivity = 0.0008
-mesh1.simulate(ftcs1d, steps, stepsize)
+mesh1.diffusivity = 0.001
+mesh1.implicit_sim(btcs1d, steps, stepsize)
 
 mesh2 = Mesh(init_state, three_pt_stencil)
 mesh2.nd_spacing = 1/nd_density
-mesh2.diffusivity = .022
-mesh2.simulate(ftcs1d, steps, stepsize)
+mesh2.diffusivity = 0.001
+mesh2.explicit_sim(ftcs1d, steps, stepsize)
 
 
 # plot stuff
@@ -46,8 +46,8 @@ ax.set_xlabel('Position along object (m)')
 ax.set_ylabel('Temperature (C)')
 ax.set_title("t = 0 sec")
 
-line, = ax.plot([], [], lw=2, label='Wood')
-line2, = ax.plot([], [], lw=2, label='Iron')
+line, = ax.plot([], [], lw=2, label='Mesh1')
+line2, = ax.plot([], [], lw=2, label='Mesh2')
 
 def init():
     line.set_data([], [])

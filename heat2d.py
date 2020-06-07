@@ -23,7 +23,7 @@ init_state[int(L*nd_density/2)][int(W*nd_density/2)] = 100
 mesh = Mesh(init_state, five_pt_stencil)
 mesh.nd_spacing = 1/nd_density
 
-mesh.simulate(ftcs2d, steps, stepsize, debug=1)
+mesh.explicit_sim(ftcs2d, steps, stepsize, debug=1)
 
 # plot stuff
 # colors are a bit messed up, it seems each grid cell shows the highest colormap value instead of current

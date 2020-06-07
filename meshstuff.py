@@ -57,7 +57,8 @@ class Mesh:
 
     # finds next num_steps states of mesh
     # stores past states in self.history
-    def simulate(self, update_fn, num_steps, stepsize, **kwargs):
+    def explicit_sim(self, update_fn, num_steps, stepsize, **kwargs):
+        print("starting explicit method simulation")
         msginterval = int(num_steps/10)
         print("simulating", num_steps, "timesteps")
         for s in range(num_steps):
@@ -69,6 +70,7 @@ class Mesh:
             with np.nditer(self.state, flags=['multi_index']) as it:
                 for x in it:
                     # these if/elses make the mesh not leak heat out of boundary nodes
+                    # i'm not sure if this is a valid way of handling boundaries
                     if it.multi_index == (0,):
                         nextstate[it.multi_index] = self.state[it.multi_index[0] + 1]
                     elif it.multi_index == (len(self.state)-1,):
@@ -81,6 +83,29 @@ class Mesh:
                 if kwargs['debug'] == 1:
                     self.niceprint()
                     input("")
+
+    def implicit_sim(self, update_fn, num_steps, stepsize, **kwargs):
+        print("starting implicit method simulation")
+        msginterval = int(num_steps/10)
+        for s in range(num_steps):
+            if s >= msginterval:
+                print("current step:", s)
+                msginterval += int(num_steps/10)
+
+            self.history.append(self.state)
+            self.state = update_fn(self, stepsize)
+            if kwargs:
+                if kwargs['debug'] == 1:
+                    self.niceprint()
+                    input("")
+            
+
+
+
+
+
+
+
 
     
 
