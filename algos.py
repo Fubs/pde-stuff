@@ -46,6 +46,11 @@ def burgers1d(mesh, it, stepsize):
     term2 = const2 * vals[1] * (vals[2] - vals[0]) + vals[1]
     return term1 + term2
 
+def convection1d(mesh, it, stepsize):
+    idx, vals = mesh.neighbors(it)
+    const = mesh.conv_spd * stepsize / mesh.nd_spacing
+    return vals[1] - const * (vals[1] - vals[0])
+
 # btcs and ctcs should be called with mesh.implicit_sim
     
 # backwards diff time, central diff space

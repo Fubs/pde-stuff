@@ -13,6 +13,7 @@ class Mesh:
         self.state = np.array(initial_state)
         self.stencil = stencil
         self.fixed = None
+        self.conv_spd = None
         self.history = []
         self.diffusivity = 1
         self.nd_spacing = 1
