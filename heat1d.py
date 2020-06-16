@@ -7,53 +7,43 @@ from algos import *
 ### constants and parameters ###
 # L is in physical length units
 # nd_density is nodes per unit length
-L = 2
-nd_density = 50
+L = 1
+nd_density = 100
 duration = 10
 stepsize = 0.001
 steps = int(duration/stepsize)
 
 
 
-#### make some initial states ###
-init_state1 = np.zeros(L*nd_density)
-init_state2 = np.zeros(L*nd_density)
-init_state3 = np.zeros(L*nd_density)
+#### make initial state ###
+init_state = 20*np.ones(L*nd_density)
 
-# set a section in each to 100 C
-mid = int(L*nd_density)//2
-#init_state1[mid:mid+5] = 100
-init_state1[mid] = 100
-init_state2[mid-10] = 100
-init_state3[mid+10] = 100
-
-
-
-
+# set left edge to 100 C
+init_state[0] = 100
 
 ### make three meshes to compare algos ###  
 
 # each item in stencil is an offset, and will 
 # be added to target index to find neighbors
-# changing this doesn't do anything right now, but I might use eventually
+# this is the only stencil that works with the 1d algorithms right now
 three_pt_stencil = [[-1],[0],[1]]
 
-mesh1 = Mesh(init_state1, three_pt_stencil)
+mesh1 = Mesh(init_state, three_pt_stencil)
 mesh1.nd_spacing = 1/nd_density
 mesh1.diffusivity = 0.001 # diffusivity constants are just made up
 
-mesh2 = Mesh(init_state2, three_pt_stencil)
+mesh2 = Mesh(init_state, three_pt_stencil)
 mesh2.nd_spacing = 1/nd_density
 mesh2.diffusivity = 0.001
 
-mesh3 = Mesh(init_state3, three_pt_stencil)
+mesh3 = Mesh(init_state, three_pt_stencil)
 mesh3.nd_spacing = 1/nd_density
 mesh3.diffusivity = 0.001
 
-# uncomment to make initial nodes have fixed values (like for a heat source/sink)
-#mesh1.fixed = [(mid,)]
-#mesh2.fixed = [(mid-10,)]
-#mesh3.fixed = [(mid+10,)]
+# this makes left boundary nodes have fixed values (like a heat source)
+mesh1.fixed = [(0,)]
+mesh2.fixed = [(0,)]
+mesh3.fixed = [(0,)]
 
 
 
@@ -64,19 +54,24 @@ mesh3.diffusivity = 0.001
 # btcs is backward diff time, central diff space
 # ctcs is central diff time, central diff space (crank-nicolson method)
 # note ftcs is called with explicit_sim() and btcs/ctcs called with implicit_sim()
+print("running ftcs")
 mesh1.explicit_sim(ftcs1d, steps, stepsize)
+print("running btcs")
 mesh2.implicit_sim(btcs1d, steps, stepsize)
+print("running ctcs")
 mesh3.implicit_sim(ctcs1d, steps, stepsize)
 
-# calling mesh.explicit_sim() or  mesh.implicit_sim() fills up the list mesh.history
-# mesh.history[n] is an array representing the state after n time steps
+# to make sim pause and display values after each step, you can add debug=1 like this
+# mesh1.explicit_sim(ftcs1d, steps, stepsize, debug=1)
+# then press enter to increment step when you run program
+
 
 
 
 
 ### plot stuff ###
 fig = plt.figure()
-ax = plt.axes(xlim=(0,L), ylim=(0, 100))
+ax = plt.axes(xlim=(0,L), ylim=(20, 100))
 
 ax.set_xlabel('Position along object (m)')
 ax.set_ylabel('Temperature (C)')
@@ -92,19 +87,20 @@ def init():
     line3.set_data([], [])
     return line, line2, line3,
 
-# only displays every tenth frame since animation is too slow otherwise
+# calling mesh.explicit_sim() or  mesh.implicit_sim() fills up the list mesh.history
+# mesh.history[n] is an array representing the state after n time steps
 def animate(i):
     x = np.linspace(0,L,L*nd_density)
-    y1 = mesh1.history[i*10]
-    y2 = mesh2.history[i*10]
-    y3 = mesh3.history[i*10]
+    y1 = mesh1.history[i]
+    y2 = mesh2.history[i]
+    y3 = mesh3.history[i]
     line.set_data(x, y1)
     line2.set_data(x, y2)
     line3.set_data(x, y3)
-    ax.set_title("t = {} sec".format(str(round(10 * i * stepsize, 2)).ljust(6)))
+    ax.set_title("t = {} sec".format(str(round(i * stepsize, 2)).ljust(6)))
     return line, line2, line3,
 
-anim = animation.FuncAnimation(fig, animate, init_func=init, frames=int(len(mesh1.history)/10), interval=20)
+anim = animation.FuncAnimation(fig, animate, init_func=init, frames=len(mesh1.history), interval=20)
 plt.legend(loc='upper left')
 plt.show()
     
