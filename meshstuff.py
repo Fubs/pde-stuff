@@ -12,7 +12,7 @@ class Mesh:
     def __init__(self, initial_state, stencil, **kwargs):
         self.state = np.array(initial_state)
         self.stencil = stencil
-        self.fixed = []
+        self.fixed = None
         self.history = []
         self.diffusivity = 1
         self.nd_spacing = 1
@@ -61,6 +61,12 @@ class Mesh:
         print("starting explicit method simulation")
         msginterval = int(num_steps/10)
         print("simulating", num_steps, "timesteps")
+        if self.fixed is not None:
+            fixedvals = []
+            for i in self.fixed:
+                fixedvals.append(self.state[i])
+        else:
+            fixedvals = None
         for s in range(num_steps):
             if s >= msginterval:
                 print("current step:",s)
@@ -70,13 +76,16 @@ class Mesh:
             with np.nditer(self.state, flags=['multi_index']) as it:
                 for x in it:
                     # these if/elses make the mesh not leak heat out of boundary nodes
-                    # i'm not sure if this is a valid way of handling boundaries
+                    # i'm not sure if this is a valid way of handling boundaries, but it makes the result more exciting
                     if it.multi_index == (0,):
                         nextstate[it.multi_index] = self.state[it.multi_index[0] + 1]
                     elif it.multi_index == (len(self.state)-1,):
                         nextstate[it.multi_index] = self.state[it.multi_index[0] - 1]
                     else:
                         nextstate[it.multi_index] = update_fn(self, it.multi_index, stepsize)
+            if fixedvals is not None:
+                for i in range(len(self.fixed)):
+                    nextstate[self.fixed[i]] = fixedvals[i]
             self.state = np.copy(nextstate)
             self.history.append(self.state)
             if kwargs:
@@ -87,13 +96,21 @@ class Mesh:
     def implicit_sim(self, update_fn, num_steps, stepsize, **kwargs):
         print("starting implicit method simulation")
         msginterval = int(num_steps/10)
+        if self.fixed is not None:
+            fixedvals = []
+            for i in self.fixed:
+                fixedvals.append(self.state[i])
+        else:
+            fixedvals = None
         for s in range(num_steps):
             if s >= msginterval:
                 print("current step:", s)
                 msginterval += int(num_steps/10)
-
             self.history.append(self.state)
             self.state = update_fn(self, stepsize)
+            if fixedvals is not None:
+                for i in range(len(self.fixed)):
+                    self.state[self.fixed[i]] = fixedvals[i]
             if kwargs:
                 if kwargs['debug'] == 1:
                     self.niceprint()

@@ -10,6 +10,9 @@ central_acc4_deriv2 = [-1/12, 4/3, -5/2, 4/3, -1/12]
 #in following algos, "it" is an iterator made by np.nditer
 #vals is an array of neighboring values, with same index as stencil
 
+
+# ftcs and burgers should be used with mesh.explicit_sim (see example in heat1d.py)
+
 # forward diff time, central diff space
 def ftcs1d(mesh, it, stepsize):
     idx, vals = mesh.neighbors(it)
@@ -44,6 +47,8 @@ def burgers1d(mesh, it, stepsize):
     term1 = const1 * (vals[0] - 2*vals[1] + vals[2])
     term2 = const2 * vals[1] * (vals[2] - vals[0]) + vals[1]
     return term1 + term2
+
+# btcs and ctcs should be called with mesh.implicit_sim
     
 def btcs1d(mesh, stepsize):
     xstep = mesh.nd_spacing
