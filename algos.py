@@ -48,6 +48,7 @@ def burgers1d(mesh, it, stepsize):
 
 # btcs and ctcs should be called with mesh.implicit_sim
     
+# backwards diff time, central diff space
 def btcs1d(mesh, stepsize):
     xstep = mesh.nd_spacing
     tstep = stepsize
@@ -74,6 +75,7 @@ def btcs1d(mesh, stepsize):
     currentState = np.copy(mesh.state)
     return numpy.linalg.solve(coeffMatrix, currentState)
 
+# central diff time, central diff space (crank-nicolson method)
 def ctcs1d(mesh, stepsize):
     r = (mesh.diffusivity * stepsize)/(mesh.nd_spacing**2)
     LBound = 1 + 2*r
