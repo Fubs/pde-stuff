@@ -5,7 +5,7 @@ from meshstuff import *
 from algos import *
 
 ### constants and parameters ###
-# L, W, H are in physical length units
+# L is in physical length units
 # nd_density is nodes per unit length
 L = 2
 nd_density = 50
