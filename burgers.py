@@ -23,7 +23,7 @@ init_state[7] = 10
 
 mesh1 = Mesh(init_state, three_pt_stencil)
 mesh1.nd_spacing = 1/nd_density
-mesh1.explicit_sim(burgers1d, steps, stepsize)
+mesh1.simulate(burgers1d, steps, stepsize)
 
 
 # plot stuff

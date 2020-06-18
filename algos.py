@@ -7,51 +7,50 @@ central_acc2_deriv2 = [1, -2, 1]
 central_acc4_deriv2 = [-1/12, 4/3, -5/2, 4/3, -1/12]
 
 
-# in following algos, "it" is an iterator made by np.nditer
-# vals is an array of neighboring values, with same index as stencil
-
-# ftcs and burgers should be called with mesh.explicit_sim (see example in heat1d.py)
-
 # forward diff time, central diff space
-def ftcs1d(mesh, it, stepsize):
-    idx, vals = mesh.neighbors(it)
-    laplacian = (vals[0] - 2*vals[1] + vals[2])
-    # mesh.diffusivity defaults to 1 when creating mesh, but can be changed
-    next_val = ((mesh.diffusivity * stepsize * laplacian)/ mesh.nd_spacing**2)  + vals[1]
-    return next_val
+def ftcs1d(mesh, stepsize):
+    nextstate = np.zeros(np.shape(mesh.state))
+    with np.nditer(mesh.state, flags=['multi_index']) as it:
+        for x in it:
+            idx, vals = mesh.neighbors(it.multi_index)
+            laplacian = (vals[0] - 2*vals[1] + vals[2])
+            # mesh.diffusivity defaults to 1 when creating mesh, but can be changed
+            next_val = ((mesh.diffusivity * stepsize * laplacian)/ mesh.nd_spacing**2)  + vals[1]
+            nextstate[it.multi_index] = next_val
+    return nextstate
 
-def ftcs2d(mesh, it, stepsize):
-    idx, vals = mesh.neighbors(it)
-    coefs = central_acc2_deriv2
-    d2x = (coefs[0]*vals[1] + coefs[1]*vals[0] + coefs[2]*vals[3]) / mesh.nd_spacing**2
-    d2y = (coefs[0]*vals[2] + coefs[1]*vals[0] + coefs[2]*vals[4]) / mesh.nd_spacing**2
-    laplacian = d2x + d2y
-    next_val = (mesh.diffusivity * stepsize * laplacian) + vals[0]
-    return next_val
+def ftcs2d(mesh, stepsize):
+    nextstate = np.zeros(np.shape(mesh.state))
+    with np.nditer(mesh.state, flags=['multi_index']) as it:
+        for x in it:
+            idx, vals = mesh.neighbors(it.multi_index)
+            coefs = central_acc2_deriv2
+            d2x = (coefs[0]*vals[1] + coefs[1]*vals[0] + coefs[2]*vals[3]) / mesh.nd_spacing**2
+            d2y = (coefs[0]*vals[2] + coefs[1]*vals[0] + coefs[2]*vals[4]) / mesh.nd_spacing**2
+            laplacian = d2x + d2y
+            nextstate[it.multi_index] = (mesh.diffusivity * stepsize * laplacian) + vals[0]
+    return nextstate
 
-def ftcs3d(mesh, it, stepsize):
-    idx, vals = mesh.neighbors(it)
-    d2x = (vals[1] + vals[4] - 2 * vals[0])/ mesh.nd_spacing**2
-    d2y = (vals[2] + vals[5] - 2 * vals[0])/ mesh.nd_spacing**2
-    d2z = (vals[3] + vals[6] - 2 * vals[0])/ mesh.nd_spacing**2
-    laplacian = d2x + d2y + d2z
-    next_val = (mesh.diffusivity * stepsize * laplacian) + vals[0]
-    return next_val
+def burgers1d(mesh, stepsize):
+    nextstate = np.zeros(np.shape(mesh.state))
+    with np.nditer(mesh.state, flags=['multi_index']) as it:
+        for x in it:
+            idx, vals = mesh.neighbors(it.multi_index)
+            const1 = stepsize/mesh.nd_spacing**2
+            const2 = -stepsize/(2*mesh.nd_spacing)
+            term1 = const1 * (vals[0] - 2*vals[1] + vals[2])
+            term2 = const2 * vals[1] * (vals[2] - vals[0]) + vals[1]
+            nextstate[it.multi_index] = term1 + term2
+    return nextstate
 
-def burgers1d(mesh, it, stepsize):
-    idx, vals = mesh.neighbors(it)
-    const1 = stepsize/mesh.nd_spacing**2
-    const2 = -stepsize/(2*mesh.nd_spacing)
-    term1 = const1 * (vals[0] - 2*vals[1] + vals[2])
-    term2 = const2 * vals[1] * (vals[2] - vals[0]) + vals[1]
-    return term1 + term2
-
-def convection1d(mesh, it, stepsize):
-    idx, vals = mesh.neighbors(it)
-    const = mesh.conv_spd * stepsize / mesh.nd_spacing
-    return vals[1] - const * (vals[1] - vals[0])
-
-# btcs and ctcs should be called with mesh.implicit_sim
+def convection1d(mesh, stepsize):
+    nextstate = np.zeros(np.shape(mesh.state))
+    with np.nditer(mesh.state, flags=['multi_index']) as it:
+        for x in it:
+            idx, vals = mesh.neighbors(it.multi_index)
+            const = mesh.conv_spd * stepsize / mesh.nd_spacing
+            nextstate[it.multi_index] = vals[1] - const * (vals[1] - vals[0])
+    return nextstate
     
 # backwards diff time, central diff space
 def btcs1d(mesh, stepsize):

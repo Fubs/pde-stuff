@@ -55,39 +55,9 @@ class Mesh:
         print('')
 
 
-
     # finds next num_steps states of mesh
     # stores past states in self.history
-    def explicit_sim(self, update_fn, num_steps, stepsize, **kwargs):
-        msginterval = int(num_steps/10)
-        print("simulating", num_steps, "timesteps")
-        if self.fixed is not None:
-            fixedvals = []
-            for i in self.fixed:
-                fixedvals.append(self.state[i])
-        else:
-            fixedvals = None
-        for s in range(num_steps):
-            if s >= msginterval:
-                print("current step:",s)
-                msginterval += int(num_steps/10)
-
-            nextstate = np.zeros(np.shape(self.state))
-            with np.nditer(self.state, flags=['multi_index']) as it:
-                for x in it:
-                    nextstate[it.multi_index] = update_fn(self, it.multi_index, stepsize)
-            if fixedvals is not None:
-                for i in range(len(self.fixed)):
-                    nextstate[self.fixed[i]] = fixedvals[i]
-            self.state = np.copy(nextstate)
-            self.history.append(self.state)
-            if kwargs:
-                if kwargs['debug'] == 1:
-                    self.niceprint()
-                    input("")
-        print("")
-
-    def implicit_sim(self, update_fn, num_steps, stepsize, **kwargs):
+    def simulate(self, update_fn, num_steps, stepsize, **kwargs):
         msginterval = int(num_steps/10)
         if self.fixed is not None:
             fixedvals = []

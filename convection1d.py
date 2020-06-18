@@ -24,7 +24,7 @@ init_state[7] = 10
 mesh = Mesh(init_state, three_pt_stencil)
 mesh.nd_spacing = 1/nd_density
 mesh.conv_spd = 1
-mesh.explicit_sim(convection1d, steps, stepsize)
+mesh.simulate(convection1d, steps, stepsize)
 
 
 # plot stuff

@@ -53,16 +53,15 @@ mesh3.fixed = [(0,)]
 # ftcs is forward diff time, central diff space
 # btcs is backward diff time, central diff space
 # ctcs is central diff time, central diff space (crank-nicolson method)
-# note ftcs is called with explicit_sim() and btcs/ctcs called with implicit_sim()
 print("running ftcs")
-mesh1.explicit_sim(ftcs1d, steps, stepsize)
+mesh1.simulate(ftcs1d, steps, stepsize)
 print("running btcs")
-mesh2.implicit_sim(btcs1d, steps, stepsize)
+mesh2.simulate(btcs1d, steps, stepsize)
 print("running ctcs")
-mesh3.implicit_sim(ctcs1d, steps, stepsize)
+mesh3.simulate(ctcs1d, steps, stepsize)
 
 # to make sim pause and display values after each step, you can add debug=1 like this
-# mesh1.explicit_sim(ftcs1d, steps, stepsize, debug=1)
+# mesh1.simulate(ftcs1d, steps, stepsize, debug=1)
 # then press enter to increment step when you run program
 
 
